@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 14%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 172 66% 50%;
+    --accent-foreground: 222 47% 6%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 47% 18%;
+    --input: 222 47% 14%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(172 66% 50%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 100%);
+    --glow-primary: 0 0 20px hsl(217 91% 60% / 0.3);
+    --glow-accent: 0 0 20px hsl(172 66% 50% / 0.3);
+
+    /* Layer colors for the diagram */
+    --layer-client: 52 100% 50%;
+    --layer-gateway: 217 91% 60%;
+    --layer-service: 172 66% 50%;
+    --layer-data: 280 65% 60%;
+    --layer-infra: 0 84% 60%;
+
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 222 47% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+}
+
+/* React Flow custom styles */
+.react-flow__background {
+  background-color: hsl(222 47% 6%) !important;
+}
+
+.react-flow__minimap {
+  background-color: hsl(222 47% 8%) !important;
+  border-radius: 8px;
+  border: 1px solid hsl(222 47% 18%) !important;
+}
+
+.react-flow__controls {
+  border-radius: 8px;
+  border: 1px solid hsl(222 47% 18%) !important;
+  background-color: hsl(222 47% 8%) !important;
+  box-shadow: none !important;
+}
+
+.react-flow__controls-button {
+  background-color: hsl(222 47% 8%) !important;
+  border-color: hsl(222 47% 18%) !important;
+  fill: hsl(210 40% 98%) !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: hsl(222 47% 14%) !important;
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(222 47% 8%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(222 47% 20%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(222 47% 30%);
+}
