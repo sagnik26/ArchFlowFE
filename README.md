@@ -1,73 +1,83 @@
-# Welcome to your Lovable project
+# ArchFlow Frontend - Interactive Architecture Diagram Visualizer
 
-## Project info
+> Beautiful, interactive architecture diagrams with real-time generation progress and React Flow visualization.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![React Flow](https://img.shields.io/badge/React%20Flow-11+-blueviolet.svg)](https://reactflow.dev/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## How can I edit this code?
+## 🎯 Overview
 
-There are several ways of editing your application.
+ArchFlow Frontend is a modern React application that visualizes AI-generated architecture diagrams with interactive, draggable nodes and beautiful styling. It features seamless integration with the arch-flow Backend.
 
-**Use Lovable**
+### ✨ Key Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- 🎨 **Interactive Diagrams** - Drag, zoom, and pan through architecture diagrams
+- 📡 **Real-time Progress** - Live updates during diagram generation (SSE)
+- ⚡ **Fast & Responsive** - Optimized rendering with React Flow
+- 🎭 **Beautiful UI** - Modern design with Tailwind CSS
+- 🔄 **Auto-Layout** - Pre-positioned nodes by architectural layers
+- 📱 **Responsive** - Works on desktop, tablet, and mobile
+- 🌈 **Component Styling** - Color-coded by type with custom shapes
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🚀 Quick Start
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js 18+ 
+- npm or yarn
+- arch-flow Backend running at `http://localhost:8080`
 
-Follow these steps:
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/your-org/ArchFlow.git
+cd ArchFlow
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install dependencies
+npm install
+# or
+yarn install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
+# or
+yarn dev
 ```
 
-**Edit a file directly in GitHub**
+The app will start at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## ⚙️ Configuration
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Environment Variables
 
-## What technologies are used for this project?
+Create a `.env` file:
+```env
+# Backend API URL
+VITE_API_BASE_URL=http://localhost:8080/api/v1
 
-This project is built with:
+# Enable SSE streaming (default: true)
+VITE_USE_STREAMING=true
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Development mode
+VITE_MODE=development
+```
 
-## How can I deploy this project?
+## 🤝 Contributing
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Contributions are always welcome!
 
-## Can I connect a custom domain to my Lovable project?
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write tests
+5. Submit a pull request
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**Made with ❤️ by the Sagnik Ghosh**
