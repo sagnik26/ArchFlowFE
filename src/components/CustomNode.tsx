@@ -82,8 +82,8 @@ const CustomNode = ({ data, selected }: NodeProps) => {
       
       <div
         className={`
-          flex flex-col items-center justify-center p-3 
-          rounded-xl transition-all duration-200
+          flex flex-col items-center justify-center p-2 
+          rounded-lg transition-all duration-200
           ${selected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
         `}
         style={{
@@ -91,22 +91,22 @@ const CustomNode = ({ data, selected }: NodeProps) => {
           borderColor: style?.borderColor || '#1ABC9C',
           borderWidth: style?.borderWidth || 2,
           borderStyle: 'solid',
-          borderRadius: style?.borderRadius || 12,
-          minHeight: style?.height || 80,
+          borderRadius: style?.borderRadius || 8,
+          minHeight: style?.height || 72,
         }}
       >
         <div 
-          className="p-2 rounded-lg mb-2"
+          className="p-1.5 rounded-md mb-1.5 shrink-0"
           style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
         >
           <IconComponent 
-            size={24} 
+            size={20} 
             style={{ color: style?.color || '#FFFFFF' }}
           />
         </div>
         
         <span 
-          className="text-xs font-semibold text-center leading-tight"
+          className="text-[11px] font-semibold text-center leading-tight line-clamp-1"
           style={{ color: style?.color || '#FFFFFF' }}
         >
           {nodeData.label}
@@ -114,7 +114,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
         
         {nodeData.technology && (
           <span 
-            className="text-[10px] mt-1 opacity-80 text-center"
+            className="text-[9px] mt-0.5 opacity-80 text-center line-clamp-1"
             style={{ color: style?.color || '#FFFFFF' }}
           >
             {nodeData.technology}
