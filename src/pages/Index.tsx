@@ -8,7 +8,9 @@ import EmptyState from "@/components/EmptyState";
 import { useDiagramGenerator } from "@/hooks/useDiagramGenerator";
 
 const Index = () => {
-  const { data, isLoading, error, generate } = useDiagramGenerator();
+  const { data, isLoading, error, generate } = useDiagramGenerator({
+    useMockData: true,
+  });
 
   const handleSubmit = (topic: string, designType: string) => {
     generate(topic, designType);

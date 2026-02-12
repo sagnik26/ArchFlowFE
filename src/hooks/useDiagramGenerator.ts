@@ -1,8 +1,11 @@
 import { useState, useCallback } from "react";
 import { DiagramResponse } from "@/types/diagram";
+import { sampleDiagramData } from "@/data/sampleDiagram";
 
 interface UseDiagramGeneratorOptions {
   apiEndpoint?: string;
+  /** When true, generate() returns sample data instead of calling the API. Use when backend is not available. */
+  useMockData?: boolean;
 }
 
 export const useDiagramGenerator = (options?: UseDiagramGeneratorOptions) => {
@@ -14,6 +17,19 @@ export const useDiagramGenerator = (options?: UseDiagramGeneratorOptions) => {
     async (topic: string, designType: string) => {
       setIsLoading(true);
       setError(null);
+
+      if (options?.useMockData) {
+        await new Promise((r) => setTimeout(r, 800));
+        setData({
+          ...sampleDiagramData,
+          topic,
+          type: designType,
+          title: `${topic} – ${designType}`,
+          description: `Sample diagram for "${topic}" (${designType}). Connect the API to get real diagrams.`,
+        });
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const apiEndpoint =
@@ -48,7 +64,7 @@ export const useDiagramGenerator = (options?: UseDiagramGeneratorOptions) => {
         setIsLoading(false);
       }
     },
-    [options?.apiEndpoint]
+    [options?.apiEndpoint, options?.useMockData]
   );
 
   const reset = useCallback(() => {
