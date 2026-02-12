@@ -2,7 +2,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Boxes } from "lucide-react";
 import GeneratorForm from "@/components/GeneratorForm";
 import DiagramCanvas from "@/components/DiagramCanvas";
-import DiagramHeader from "@/components/DiagramHeader";
 import LayerLegend from "@/components/LayerLegend";
 import LoadingState from "@/components/LoadingState";
 import EmptyState from "@/components/EmptyState";
@@ -19,8 +18,8 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
+        <div className="w-full px-4 py-4">
+          <div className="flex items-center justify-start gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
               <Boxes className="w-6 h-6 text-primary-foreground" />
             </div>
@@ -34,27 +33,29 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col">
-        {/* Generator Form */}
-        <GeneratorForm onSubmit={handleSubmit} isLoading={isLoading} />
+      {/* Main Content: Left input panel + Right output panel */}
+      <main className="flex-1 flex flex-row min-h-0 px-4 py-6 gap-6">
+        {/* Left panel - Input (same height as right panel) */}
+        <aside className="w-full min-w-0 max-w-[380px] shrink-0 flex flex-col gap-4 overflow-hidden px-4 self-stretch">
+          <div className="flex-1 min-h-0 flex flex-col">
+            <GeneratorForm onSubmit={handleSubmit} isLoading={isLoading} />
+          </div>
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </aside>
 
-        {/* Error State */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Diagram Area */}
-        <div className="flex-1 mt-6 relative">
+        {/* Right panel - Output / Diagram */}
+        <div className="flex-1 min-w-0 flex flex-col min-h-0 relative">
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
@@ -62,7 +63,7 @@ const Index = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="glass-panel h-[calc(100vh-320px)] min-h-[500px]"
+                className="glass-panel flex-1 min-h-[400px]"
               >
                 <LoadingState />
               </motion.div>
@@ -72,10 +73,9 @@ const Index = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-[calc(100vh-270px)] min-h-[500px] flex flex-col"
+                className="flex-1 min-h-[400px] flex flex-col min-h-0 overflow-hidden"
               >
-                <DiagramHeader data={data} />
-                <div className="flex-1 glass-panel relative overflow-hidden">
+                <div className="flex-1 glass-panel relative overflow-hidden min-h-0">
                   <DiagramCanvas data={data} />
                   <LayerLegend layers={data.layers} />
                 </div>
@@ -86,7 +86,7 @@ const Index = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="glass-panel h-[calc(100vh-320px)] min-h-[500px] relative overflow-hidden"
+                className="glass-panel flex-1 min-h-[400px] relative overflow-hidden"
               >
                 <EmptyState />
               </motion.div>

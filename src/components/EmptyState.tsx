@@ -36,8 +36,8 @@ const EmptyState = () => {
         transition={{ delay: 0.4 }}
         className="text-muted-foreground max-w-md mb-6"
       >
-        Enter a topic above and select the design type to generate a beautiful
-        system architecture diagram.
+        Enter a topic in the left panel and select the design type to generate a
+        beautiful system architecture diagram.
       </motion.p>
 
       <motion.div
@@ -46,7 +46,7 @@ const EmptyState = () => {
         transition={{ delay: 0.5 }}
         className="flex items-center gap-2 text-sm text-primary"
       >
-        <span>Get started by filling the form above</span>
+        <span>Get started by filling the form on the left</span>
         <ArrowRight size={16} />
       </motion.div>
 
