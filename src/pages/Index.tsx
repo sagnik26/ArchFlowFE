@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Boxes } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Boxes, LayoutDashboard, Home } from "lucide-react";
 import GeneratorForm from "@/components/GeneratorForm";
 import DiagramCanvas from "@/components/DiagramCanvas";
 import LayerLegend from "@/components/LayerLegend";
@@ -20,17 +21,33 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="w-full px-4 py-4">
-          <div className="flex items-center justify-start gap-3">
+        <div className="w-full px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
               <Boxes className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">ArchiGen</h1>
+              <h1 className="text-xl font-bold text-foreground">HLDForge</h1>
               <p className="text-xs text-muted-foreground">
                 System Design Generator
               </p>
             </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Home className="w-4 h-4" />
+              Home
+            </Link>
+            <Link
+              to="/studio"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Design Studio
+            </Link>
           </div>
         </div>
       </header>
