@@ -33,18 +33,12 @@ const Index = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
+          <div className="flex items-center gap-1">
+            <Link to="/" className="header-nav-link">
               <Home className="w-4 h-4" />
               Home
             </Link>
-            <Link
-              to="/studio"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
+            <Link to="/studio" className="header-nav-link">
               <LayoutDashboard className="w-4 h-4" />
               Design Studio
             </Link>

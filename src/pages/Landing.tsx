@@ -25,29 +25,41 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
-const features = [
+const MODULES = [
   {
+    id: "hld",
     icon: Boxes,
     title: "High-Level Design",
-    description: "Generate system architecture diagrams from a single prompt. Interactive React Flow canvas with layers and components.",
+    subtitle: "System architecture",
+    description:
+      "Generate system architecture diagrams from a single prompt. Interactive React Flow canvas with layers and components.",
     color: "from-primary to-primary/80",
-    href: "/studio",
+    href: "/generate",
+    cta: "Start HLD",
   },
   {
+    id: "db",
     icon: Database,
-    title: "Database Design",
-    description: "HLD context flows into ER schemas. Define entities, relationships, and get a clear database design.",
+    title: "DB Design",
+    subtitle: "Database schema & ER",
+    description:
+      "HLD context flows into ER schemas. Define entities, relationships, and get a clear database design.",
     color: "from-accent to-accent/80",
-    href: "/studio",
+    href: "/db-design",
+    cta: "Go to DB Design",
   },
   {
+    id: "lld",
     icon: Code2,
-    title: "Low-Level Design",
-    description: "Class diagrams and API specs built on HLD + DB context. Ready for implementation.",
+    title: "LLD Generation",
+    subtitle: "Classes & APIs",
+    description:
+      "Class diagrams and API specs built on HLD + DB context. Ready for implementation.",
     color: "from-primary to-accent",
-    href: "/studio",
+    href: "/lld",
+    cta: "Go to LLD",
   },
-];
+] as const;
 
 export default function Landing() {
   return (
@@ -65,13 +77,31 @@ export default function Landing() {
               <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20">
                 <Boxes className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold text-foreground">HLDForge</span>
+              <span className="text-xl font-bold text-foreground">
+                HLDForge
+              </span>
             </Link>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/generate">Quick Generate</Link>
-              </Button>
-              <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25" asChild>
+            <div className="flex items-center gap-1 sm:gap-0 flex-wrap justify-end">
+              <Link
+                to="/#modules"
+                className="header-nav-link hidden sm:inline-flex"
+              >
+                Modules
+              </Link>
+              <Link to="/generate" className="header-nav-link">
+                Quick HLD
+              </Link>
+              <Link to="/db-design" className="header-nav-link">
+                DB Design
+              </Link>
+              <Link to="/lld" className="header-nav-link mr-4">
+                LLD
+              </Link>
+              <Button
+                size="sm"
+                className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
+                asChild
+              >
                 <Link to="/studio">
                   Design Studio
                   <ArrowRight className="w-4 h-4" />
@@ -109,9 +139,14 @@ export default function Landing() {
               variants={item}
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
             >
-              Generate high-level architecture, database schemas, and low-level design in a single guided flow. Context flows between phases—no starting from scratch.
+              Generate high-level architecture, database schemas, and low-level
+              design in a single guided flow. Context flows between phases—no
+              starting from scratch.
             </motion.p>
-            <motion.div variants={item} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <motion.div
+              variants={item}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
               <Button
                 size="lg"
                 className="gap-2 w-full sm:w-auto text-base px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-primary/40 transition-shadow"
@@ -122,23 +157,15 @@ export default function Landing() {
                   Open Design Studio
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 w-full sm:w-auto text-base px-8 py-6 border-border bg-card/50 hover:bg-muted/50"
-                asChild
-              >
-                <Link to="/generate">
-                  <Zap className="w-5 h-5" />
-                  Quick HLD only
-                </Link>
-              </Button>
             </motion.div>
           </motion.div>
         </section>
 
-        {/* Feature cards – Aceternity-style gradient border */}
-        <section className="container mx-auto px-4 py-16 md:py-24">
+        {/* Modules – what the product offers (navigation target) */}
+        <section
+          id="modules"
+          className="container mx-auto px-4 py-16 md:py-24 scroll-mt-20"
+        >
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -146,42 +173,47 @@ export default function Landing() {
             className="text-center mb-14"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-              One flow, three phases
+              What HLDForge offers
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Each phase receives context from the previous. Export diagrams and specs when you’re done.
+              Three modules in one flow: start with system architecture, add
+              database design, then generate low-level design. Jump to any
+              module below.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {features.map((feature, i) => (
+            {MODULES.map((module, i) => (
               <motion.div
-                key={feature.title}
+                key={module.id}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ delay: i * 0.1 }}
                 className="group"
               >
-                <Link to={feature.href}>
+                <Link to={module.href}>
                   <div className="relative h-full rounded-2xl p-[1px] bg-gradient-to-b from-primary/50 via-accent/50 to-primary/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10">
                     <div className="relative h-full rounded-2xl bg-card border border-border/50 p-6 flex flex-col text-left transition-colors group-hover:bg-card/90">
                       <div
                         className={cn(
                           "inline-flex p-3 rounded-xl bg-gradient-to-br mb-4 w-fit",
-                          feature.color
+                          module.color,
                         )}
                       >
-                        <feature.icon className="w-6 h-6 text-white" />
+                        <module.icon className="w-6 h-6 text-white" />
                       </div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                        {module.subtitle}
+                      </p>
                       <h3 className="text-lg font-semibold text-foreground mb-2">
-                        {feature.title}
+                        {module.title}
                       </h3>
                       <p className="text-sm text-muted-foreground flex-1">
-                        {feature.description}
+                        {module.description}
                       </p>
                       <span className="inline-flex items-center gap-1.5 text-sm text-primary font-medium mt-4 group-hover:gap-2 transition-all">
-                        Go to Studio
+                        {module.cta}
                         <ArrowRight className="w-4 h-4" />
                       </span>
                     </div>
@@ -205,9 +237,14 @@ export default function Landing() {
                 Ready to design?
               </h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Start with a system topic and get HLD, DB schema, and LLD in one flow.
+                Start with a system topic and get HLD, DB schema, and LLD in one
+                flow.
               </p>
-              <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
+              <Button
+                size="lg"
+                className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                asChild
+              >
                 <Link to="/studio">
                   Open Design Studio
                   <ArrowRight className="w-4 h-4" />
@@ -224,10 +261,22 @@ export default function Landing() {
               <Boxes className="w-5 h-5 text-primary" />
               <span className="font-semibold text-foreground">HLDForge</span>
             </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
-              <Link to="/studio" className="hover:text-foreground transition-colors">Design Studio</Link>
-              <Link to="/generate" className="hover:text-foreground transition-colors">Quick Generate</Link>
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
+              <Link to="/" className="header-nav-link">
+                Home
+              </Link>
+              <Link to="/generate" className="header-nav-link">
+                Quick HLD
+              </Link>
+              <Link to="/db-design" className="header-nav-link">
+                DB Design
+              </Link>
+              <Link to="/lld" className="header-nav-link">
+                LLD
+              </Link>
+              <Link to="/studio" className="header-nav-link">
+                Design Studio
+              </Link>
             </div>
           </div>
         </footer>

@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import DesignStudio from "./pages/DesignStudio";
+import DBDesign from "./pages/DBDesign";
+import LLDGen from "./pages/LLDGen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,6 +21,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/generate" element={<Index />} />
+          <Route path="/db-design" element={<DBDesign />} />
+          <Route path="/lld" element={<LLDGen />} />
           <Route path="/studio" element={<DesignStudio />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
