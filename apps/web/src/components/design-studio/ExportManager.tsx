@@ -65,14 +65,14 @@ export default function ExportManager({ className, onExport }: ExportManagerProp
           variant="outline"
           size="sm"
           disabled={!hasAnyData}
-          className={cn("gap-2 border-border bg-card hover:bg-muted", className)}
+          className={cn("gap-2 rounded-xl border-border/50 bg-card/60 hover:bg-muted/80", className)}
         >
           <Download className="w-4 h-4" />
           Export
           <ChevronDown className="w-4 h-4 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52 border-border bg-card">
+      <DropdownMenuContent align="end" className="w-52 rounded-xl border-border/50 bg-card/95 backdrop-blur-sm">
         {(Object.entries(formatLabel) as [ExportFormat, string][]).map(([format, label]) => {
           const Icon = formatIcon[format];
           const busy = exporting === format;

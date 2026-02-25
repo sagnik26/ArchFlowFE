@@ -145,6 +145,22 @@
       transparent 50%
     );
   }
+
+  /* Design Studio – Lovable-style dashboard */
+  .design-studio-bg {
+    background-color: hsl(222 47% 5%);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 0% 0%, hsl(var(--primary) / 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 60% at 100% 100%, hsl(var(--accent) / 0.04) 0%, transparent 50%);
+  }
+
+  .design-studio-card {
+    @apply rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm shadow-sm;
+  }
+
+  .design-studio-sidebar-card {
+    @apply rounded-2xl border border-border/40 bg-card/70 backdrop-blur-sm shadow-sm;
+  }
 }
 
 @keyframes gradient-mesh-shift {
