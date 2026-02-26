@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Boxes } from "lucide-react";
 import DesignPhaseNav from "@/components/design-studio/DesignPhaseNav";
@@ -8,11 +9,15 @@ import LLDDesigner from "@/components/design-studio/LLDDesigner";
 import UnifiedDesignPanel from "@/components/design-studio/UnifiedDesignPanel";
 import ExportManager from "@/components/design-studio/ExportManager";
 import LoadingState from "@/components/LoadingState";
+import { Button } from "@/components/ui/button";
 import { useDesignContext } from "@/store/designContext";
-import { useDiagramGenerator } from "@/hooks/useDiagramGenerator";
-import { sampleDBSchema } from "@/data/sampleDbSchema";
-import { sampleLLDDesign } from "@/data/sampleLldDesign";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchApi } from "@/lib/api";
 import type { DesignPhase } from "@/store/designContext";
+import type { DiagramResponse } from "@/types/diagram";
+import type { DBSchema } from "@/types/dbDesign";
+import type { LLDDesign } from "@/types/lldDesign";
+import { toast } from "sonner";
 
 export default function DesignStudio() {
   const {
@@ -29,82 +34,47 @@ export default function DesignStudio() {
     setHLDPrompt,
     setHLDDesignType,
   } = useDesignContext();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const {
-    data: hldHookData,
-    isLoading: hldLoading,
-    error: hldError,
-    generate: generateHLD,
-  } = useDiagramGenerator({ useMockData: true });
-
-  const [dbLoading, setDbLoading] = useState(false);
-  const [lldLoading, setLldLoading] = useState(false);
   const [pipelineError, setPipelineError] = useState<string | null>(null);
   const [pipelineStep, setPipelineStep] = useState<DesignPhase | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // Sync hook result into design context so navigation/export see it
-  useEffect(() => {
-    if (hldHookData) {
-      setHLDResult(hldHookData);
-    }
-  }, [hldHookData, setHLDResult]);
-
-  const effectiveHldResult = hldHookData ?? hldResult;
-
-  const runDBStep = useCallback(
-    async (prompt: string) => {
-      setDbLoading(true);
-      try {
-        await new Promise((r) => setTimeout(r, 3500));
-        setDBResult({
-          ...sampleDBSchema,
-          name: `Schema for: ${prompt.slice(0, 40)}…`,
-          description: `Generated from: "${prompt}"`,
-        });
-      } catch {
-        throw new Error("Failed to generate DB design");
-      } finally {
-        setDbLoading(false);
-      }
-    },
-    [setDBResult],
-  );
-
-  const runLLDStep = useCallback(
-    async (prompt: string) => {
-      setLldLoading(true);
-      try {
-        await new Promise((r) => setTimeout(r, 3500));
-        setLLDResult({
-          ...sampleLLDDesign,
-          name: `LLD: ${prompt.slice(0, 30)}…`,
-          description: `Generated from: "${prompt}"`,
-        });
-      } catch {
-        throw new Error("Failed to generate LLD");
-      } finally {
-        setLldLoading(false);
-      }
-    },
-    [setLLDResult],
-  );
+  const effectiveHldResult = hldResult;
 
   const onUnifiedGenerate = useCallback(
     async (prompt: string, designType: string) => {
+      if (!user) {
+        setPipelineError("Please log in to generate designs.");
+        return;
+      }
       setPipelineError(null);
       setPipelineStep("hld");
       setCurrentPhase("hld");
-
       try {
-        await generateHLD(prompt, designType);
-
-        setPipelineStep("db");
-        setCurrentPhase("db");
-        await runDBStep(prompt);
-
-        setPipelineStep("lld");
+        const res = await fetchApi("/api/v1/design-studio/generate", {
+          method: "POST",
+          body: JSON.stringify({ prompt, designType }),
+        });
+        if (res.status === 401) {
+          setPipelineError("Please log in to generate designs.");
+          navigate("/login");
+          return;
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || "Generation failed");
+        }
+        const data = (await res.json()) as {
+          hld: DiagramResponse;
+          db: DBSchema;
+          lld: LLDDesign;
+        };
+        setHLDResult(data.hld);
+        setDBResult(data.db);
+        setLLDResult(data.lld);
         setCurrentPhase("lld");
-        await runLLDStep(prompt);
       } catch (err) {
         setPipelineError(
           err instanceof Error ? err.message : "Pipeline failed",
@@ -113,13 +83,53 @@ export default function DesignStudio() {
         setPipelineStep(null);
       }
     },
-    [generateHLD, runDBStep, runLLDStep, setCurrentPhase],
+    [
+      user,
+      setCurrentPhase,
+      setHLDResult,
+      setDBResult,
+      setLLDResult,
+      navigate,
+    ],
   );
+
+  const onSave = useCallback(async () => {
+    if (!user) {
+      toast.error("Please log in to save.");
+      navigate("/login");
+      return;
+    }
+    if (!hldResult || !dbResult || !lldResult) {
+      toast.error("Generate a design first.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetchApi("/api/v1/design-studio/save", {
+        method: "POST",
+        body: JSON.stringify({ hld: hldResult, db: dbResult, lld: lldResult }),
+      });
+      if (res.status === 401) {
+        toast.error("Please log in to save.");
+        navigate("/login");
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Save failed");
+      }
+      toast.success("Design saved.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }, [user, hldResult, dbResult, lldResult, navigate]);
 
   const renderPhaseContent = () => {
     switch (currentPhase) {
       case "hld":
-        if (hldLoading) return <LoadingState />;
+        if (pipelineStep === "hld") return <LoadingState />;
         if (effectiveHldResult) return <HLDCanvas data={effectiveHldResult} />;
         return (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground p-10">
@@ -133,7 +143,7 @@ export default function DesignStudio() {
           </div>
         );
       case "db":
-        if (dbLoading) return <LoadingState />;
+        if (pipelineStep === "db") return <LoadingState />;
         if (dbResult) return <DBDesigner data={dbResult} />;
         return (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground p-10">
@@ -147,7 +157,7 @@ export default function DesignStudio() {
           </div>
         );
       case "lld":
-        if (lldLoading) return <LoadingState />;
+        if (pipelineStep === "lld") return <LoadingState />;
         if (lldResult) return <LLDDesigner data={lldResult} />;
         return (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground p-10">
@@ -163,8 +173,7 @@ export default function DesignStudio() {
     }
   };
 
-  const isPipelineRunning =
-    pipelineStep !== null || hldLoading || dbLoading || lldLoading;
+  const isPipelineRunning = pipelineStep !== null;
 
   const hasGenerationStarted =
     isPipelineRunning || !!effectiveHldResult || !!dbResult || !!lldResult;
@@ -178,7 +187,7 @@ export default function DesignStudio() {
       onGenerate={onUnifiedGenerate}
       isPipelineRunning={isPipelineRunning}
       currentStep={pipelineStep}
-      error={pipelineError ?? hldError}
+      error={pipelineError}
     />
   );
 
@@ -197,7 +206,31 @@ export default function DesignStudio() {
               </h1>
             </div>
           </div>
-          <ExportManager onExport={(fmt) => console.log("Export", fmt)} />
+          <div className="flex items-center gap-2">
+            {user ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  disabled={saving || !hldResult || !dbResult || !lldResult}
+                  onClick={onSave}
+                >
+                  {saving ? "Saving…" : "Save"}
+                </Button>
+                <ExportManager onExport={(fmt) => console.log("Export", fmt)} />
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => navigate("/login")}
+              >
+                Log in
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
