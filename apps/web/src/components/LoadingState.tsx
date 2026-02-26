@@ -28,7 +28,7 @@ const LoadingState = () => {
                 transform: `rotate(${index * 90}deg) translateY(-50px) rotate(-${index * 90}deg)`,
               }}
             >
-              <div className="p-2 rounded-lg bg-card border border-border">
+              <div className="p-2 rounded-xl bg-card/80 border border-border/50">
                 <Icon size={16} className="text-primary" />
               </div>
             </motion.div>
@@ -40,7 +40,7 @@ const LoadingState = () => {
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30"
+            className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 border border-primary/20"
           >
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </motion.div>

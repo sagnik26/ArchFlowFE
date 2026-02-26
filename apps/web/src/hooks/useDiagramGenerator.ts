@@ -14,21 +14,22 @@ export const useDiagramGenerator = (options?: UseDiagramGeneratorOptions) => {
   const [error, setError] = useState<string | null>(null);
 
   const generate = useCallback(
-    async (topic: string, designType: string) => {
+    async (topic: string, designType: string): Promise<DiagramResponse | null> => {
       setIsLoading(true);
       setError(null);
 
       if (options?.useMockData) {
-        await new Promise((r) => setTimeout(r, 800));
-        setData({
+        await new Promise((r) => setTimeout(r, 3500));
+        const result: DiagramResponse = {
           ...sampleDiagramData,
           topic,
           type: designType,
           title: `${topic} – ${designType}`,
           description: `Sample diagram for "${topic}" (${designType}). Connect the API to get real diagrams.`,
-        });
+        };
+        setData(result);
         setIsLoading(false);
-        return;
+        return result;
       }
 
       try {
@@ -48,18 +49,23 @@ export const useDiagramGenerator = (options?: UseDiagramGeneratorOptions) => {
           const errorData = await response
             .json()
             .catch(() => ({ message: response.statusText }));
-          throw new Error(
-            errorData.message || `HTTP error! status: ${response.status}`
-          );
+          const msg =
+            errorData.message || `HTTP error! status: ${response.status}`;
+          setError(msg);
+          throw new Error(msg);
         }
 
         const result: DiagramResponse = await response.json();
         console.log("result", result);
         setData(result);
+        return result;
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to generate diagram"
-        );
+        if (err instanceof Error && err.message) {
+          setError(err.message);
+        } else {
+          setError("Failed to generate diagram");
+        }
+        throw err;
       } finally {
         setIsLoading(false);
       }
