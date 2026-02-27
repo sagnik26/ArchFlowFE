@@ -25,13 +25,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setAuthToken = useCallback((token: string) => {
     setToken(token);
-    setUser(null);
     setLoading(true);
+    let cancelled = false;
+    getMe()
+      .then((data) => {
+        if (!cancelled) setUser(data.user);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const logout = useCallback(() => {
     clearToken();
     setUser(null);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
