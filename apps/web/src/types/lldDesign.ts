@@ -35,7 +35,7 @@ export interface ApiEndpoint {
   summary?: string;
   requestBody?: string;
   responseType?: string;
-  statusCodes?: string;
+  statusCodes?: string | Record<string, string>;
 }
 
 export interface ApiSpec {

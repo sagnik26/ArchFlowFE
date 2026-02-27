@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import DesignStudio from "./pages/DesignStudio";
@@ -26,10 +27,38 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/generate" element={<Index />} />
-            <Route path="/db-design" element={<DBDesign />} />
-            <Route path="/lld" element={<LLDGen />} />
-            <Route path="/studio" element={<DesignStudio />} />
+            <Route
+              path="/generate"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/db-design"
+              element={
+                <ProtectedRoute>
+                  <DBDesign />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lld"
+              element={
+                <ProtectedRoute>
+                  <LLDGen />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/studio"
+              element={
+                <ProtectedRoute>
+                  <DesignStudio />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

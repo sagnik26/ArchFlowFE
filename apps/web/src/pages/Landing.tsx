@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ProfileMenu } from "@/components/ProfileMenu";
 
 const container = {
   hidden: { opacity: 0 },
@@ -81,7 +82,7 @@ export default function Landing() {
                 HLDForge
               </span>
             </Link>
-            <div className="flex items-center gap-1 sm:gap-0 flex-wrap justify-end">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <Link
                 to="/#modules"
                 className="header-nav-link hidden sm:inline-flex"
@@ -89,19 +90,13 @@ export default function Landing() {
                 Modules
               </Link>
               <Link to="/generate" className="header-nav-link">
-                Quick HLD
+                HLD
               </Link>
               <Link to="/db-design" className="header-nav-link">
                 DB Design
               </Link>
               <Link to="/lld" className="header-nav-link">
                 LLD
-              </Link>
-              <Link to="/login" className="header-nav-link">
-                Log in
-              </Link>
-              <Link to="/signup" className="header-nav-link mr-2">
-                Sign up
               </Link>
               <Button
                 size="sm"
@@ -113,6 +108,7 @@ export default function Landing() {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
+              <ProfileMenu />
             </div>
           </div>
         </nav>
