@@ -94,8 +94,14 @@ export default function Landing() {
               <Link to="/db-design" className="header-nav-link">
                 DB Design
               </Link>
-              <Link to="/lld" className="header-nav-link mr-4">
+              <Link to="/lld" className="header-nav-link">
                 LLD
+              </Link>
+              <Link to="/login" className="header-nav-link">
+                Log in
+              </Link>
+              <Link to="/signup" className="header-nav-link mr-2">
+                Sign up
               </Link>
               <Button
                 size="sm"
