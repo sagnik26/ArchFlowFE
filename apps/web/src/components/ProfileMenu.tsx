@@ -1,5 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { User as UserIcon, LogOut, LogIn, UserPlus } from "lucide-react";
+import {
+  User as UserIcon,
+  LogOut,
+  LogIn,
+  UserPlus,
+  ClipboardList,
+  Activity,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -43,6 +50,21 @@ export function ProfileMenu() {
               Signed in as
               <div className="font-medium truncate">{user.email}</div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => navigate("/audit-trails")}
+              className="gap-2"
+            >
+              <ClipboardList className="w-4 h-4" />
+              Audit trails
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => navigate("/token-usage")}
+              className="gap-2"
+            >
+              <Activity className="w-4 h-4" />
+              Token usage
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="gap-2">
               <LogOut className="w-4 h-4" />

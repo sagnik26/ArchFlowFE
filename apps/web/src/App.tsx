@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import DesignStudio from "./pages/DesignStudio";
 import DBDesign from "./pages/DBDesign";
 import LLDGen from "./pages/LLDGen";
+import AuditTrails from "./pages/AuditTrails";
+import TokenUsage from "./pages/TokenUsage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -56,6 +58,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DesignStudio />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit-trails"
+              element={
+                <ProtectedRoute>
+                  <AuditTrails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/token-usage"
+              element={
+                <ProtectedRoute>
+                  <TokenUsage />
                 </ProtectedRoute>
               }
             />
