@@ -19,6 +19,26 @@ import type { DBSchema } from "@/types/dbDesign";
 import type { LLDDesign } from "@/types/lldDesign";
 import { toast } from "sonner";
 
+function hldToContextString(hld: DiagramResponse): string {
+  const parts = [`Title: ${hld.title}`, `Topic: ${hld.topic}`];
+  if (hld.nodes?.length) {
+    parts.push(
+      "Components: " + hld.nodes.map((n) => n.data?.label || n.id).join(", ")
+    );
+  }
+  return parts.join("\n");
+}
+
+function dbToContextString(db: DBSchema): string {
+  const parts = [`Schema: ${db.name}`];
+  if (db.entities?.length) {
+    parts.push(
+      "Entities: " + db.entities.map((e) => e.displayName || e.name).join(", ")
+    );
+  }
+  return parts.join("\n");
+}
+
 export default function DesignStudio() {
   const {
     currentPhase,
@@ -52,28 +72,61 @@ export default function DesignStudio() {
       setPipelineError(null);
       setPipelineStep("hld");
       setCurrentPhase("hld");
-      try {
-        const res = await fetchApi("/api/v1/design-studio/generate", {
-          method: "POST",
-          body: JSON.stringify({ prompt, designType }),
-        });
+
+      const handleAuth = (res: Response) => {
         if (res.status === 401) {
           setPipelineError("Please log in to generate designs.");
           navigate("/login");
-          return;
+          return true;
         }
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.message || "Generation failed");
+        return false;
+      };
+
+      try {
+        // Step 1: HLD
+        const hldRes = await fetchApi("/api/v1/hld/generate", {
+          method: "POST",
+          body: JSON.stringify({ topic: prompt, type: designType }),
+        });
+        if (handleAuth(hldRes)) return;
+        if (!hldRes.ok) {
+          const data = await hldRes.json().catch(() => ({}));
+          throw new Error(data.message || "HLD generation failed");
         }
-        const data = (await res.json()) as {
-          hld: DiagramResponse;
-          db: DBSchema;
-          lld: LLDDesign;
-        };
-        setHLDResult(data.hld);
-        setDBResult(data.db);
-        setLLDResult(data.lld);
+        const hld = (await hldRes.json()) as DiagramResponse;
+        setHLDResult(hld);
+        setCurrentPhase("hld");
+        setPipelineStep("db");
+
+        // Step 2: DB (with HLD context)
+        const hldContext = hldToContextString(hld);
+        const dbRes = await fetchApi("/api/v1/db/generate", {
+          method: "POST",
+          body: JSON.stringify({ prompt, hldContext }),
+        });
+        if (handleAuth(dbRes)) return;
+        if (!dbRes.ok) {
+          const data = await dbRes.json().catch(() => ({}));
+          throw new Error(data.message || "DB generation failed");
+        }
+        const db = (await dbRes.json()) as DBSchema;
+        setDBResult(db);
+        setCurrentPhase("db");
+        setPipelineStep("lld");
+
+        // Step 3: LLD (with DB and HLD context)
+        const dbContext = dbToContextString(db);
+        const lldRes = await fetchApi("/api/v1/lld/generate", {
+          method: "POST",
+          body: JSON.stringify({ prompt, dbContext, hldContext }),
+        });
+        if (handleAuth(lldRes)) return;
+        if (!lldRes.ok) {
+          const data = await lldRes.json().catch(() => ({}));
+          throw new Error(data.message || "LLD generation failed");
+        }
+        const lld = (await lldRes.json()) as LLDDesign;
+        setLLDResult(lld);
         setCurrentPhase("lld");
       } catch (err) {
         setPipelineError(
