@@ -29,10 +29,10 @@ const apiEndpointSchema = z.object({
   id: z.string(),
   method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
   path: z.string(),
-  summary: z.string().optional(),
-  requestBody: z.string().optional(),
-  responseType: z.string().optional(),
-  statusCodes: z.string().optional(),
+  summary: z.union([z.string(), z.record(z.any())]).optional(),
+  requestBody: z.union([z.string(), z.record(z.any())]).optional(),
+  responseType: z.union([z.string(), z.record(z.any())]).optional(),
+  statusCodes: z.union([z.string(), z.record(z.string())]).optional(),
 });
 
 const apiSpecSchema = z.object({
