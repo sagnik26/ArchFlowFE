@@ -15,7 +15,90 @@ ArchFlow is a full-stack application that helps engineers generate software arch
 - **DB** – Entity-relationship schemas (entities, attributes, relationships)
 - **LLD** – Low-level design (classes, APIs with endpoints and status codes)
 
-The project is a **monorepo** with a React frontend (`apps/web`) and Node/Express API (`apps/api`). The API uses OpenAI with JSON mode and Zod validation; designs are stored in MongoDB.
+The project is a **Turbo-powered monorepo** with a React frontend (`apps/web`) and Node/Express API (`apps/api`). The API uses OpenAI with JSON mode and Zod validation; designs are stored in MongoDB.
+
+## What is this project?
+
+ArchFlow is meant to be a **production-style architecture copilot**:
+
+- Users write a **single natural-language prompt** (chat-style).
+- The backend orchestrates multiple LLM calls to generate:
+  - a **High-Level Design** diagram,
+  - a **Database schema**,
+  - and a **Low-Level Design** (classes + APIs),
+  all in parallel.
+- The frontend renders each of these as its own **visual canvas** with tabs (HLD / DB / LLD) and shows live generation status per tab.
+- Designs can be **saved, listed and revisited** later.
+
+Everything is built to be extendable toward:
+- full conversational chat flows,
+- RAG over previous designs and internal docs,
+- and, later, fine-tuning if you need tighter control.
+
+## Code structure & architecture
+
+### Monorepo & package management
+
+- This repo is a **monorepo managed with Turborepo** and **npm workspaces**.
+- Root `package.json`:
+  - declares `workspaces: ["apps/*"]` so `apps/api` and `apps/web` share a single dependency graph,
+  - has `devDependencies: { "turbo": "..." }` and scripts:
+    - `dev` → `turbo run dev`
+    - `build` → `turbo run build`
+    - `lint` → `turbo run lint`
+    - `preview` → `turbo run preview`
+  - Turborepo takes care of **task orchestration, caching, and running the two apps in parallel** from the root.
+- Each app (`apps/api`, `apps/web`) has its **own `package.json`, TypeScript config, scripts and dependencies**, but they share a single `node_modules` at the root.
+
+### Backend code structure (`apps/api`)
+
+The backend follows a **layered, controller-based structure**:
+
+- `src/index.ts` – Express app bootstrap (middleware, routes, health).
+- **Feature folders**:
+  - `src/hld/` – HLD controller + routes.
+  - `src/db/` – DB controller + routes.
+  - `src/lld/` – LLD controller + routes.
+  - `src/designStudio/` – Orchestrator for the combined HLD+DB+LLD flow and saving full designs.
+- **Cross-cutting modules**:
+  - `src/services/llm.ts` – Single OpenAI client and `generateStructured()` helper (JSON-mode + Zod validation on the callers).
+  - `src/validators/` – Zod schemas for all LLM outputs (`diagram`, `dbDesign`, `lldDesign`).
+  - `src/models/` – Mongoose models (`User`, `Design`) so all design artifacts are stored in MongoDB.
+  - `src/auth/` – Auth controllers/middleware (signup, login, JWT, `/me`).
+
+Each controller:
+- validates input with Zod,
+- calls `generateStructured()` with a **system + user prompt**,
+- validates the JSON response against its schema,
+- normalizes/patches fields (IDs, timestamps, defaults),
+- and returns a clean JSON payload to the frontend.
+
+### Frontend code structure (`apps/web`)
+
+The frontend is a **SPA in React** using routes and context for state:
+
+- `src/App.tsx` – Router, protected routes, base layout.
+- **Pages**:
+  - `DesignStudio.tsx` – Main experience: unified prompt + HLD/DB/LLD tabs, parallel generation, save + export.
+  - `Login.tsx`, `Signup.tsx` – Auth flows.
+  - `AuditTrails.tsx`, `TokenUsage.tsx` – Simple analytics / history views.
+- **State & context**:
+  - `contexts/AuthContext.tsx` – Auth token, current user, `/me` fetching.
+  - `store/designContext.ts` – Central store for:
+    - current phase (HLD / DB / LLD),
+    - current prompt + design type,
+    - and the latest HLD/DB/LLD results (with a `resetAll()` helper for fresh runs).
+- **UI components**:
+  - `components/design-studio/` – `UnifiedDesignPanel` (prompt + generate button), `DesignPhaseNav` (HLD/DB/LLD tabs with status), `HLDCanvas`, `DBDesigner`, `LLDDesigner`, `ExportManager`.
+  - `components/ProfileMenu.tsx`, `ProtectedRoute.tsx`, shared UI wrappers (built on top of shadcn/Radix primitives).
+- **Types**:
+  - `types/diagram.ts`, `types/dbDesign.ts`, `types/lldDesign.ts` – Frontend TypeScript interfaces aligned with the backend Zod schemas.
+
+The Design Studio page:
+- calls the three endpoints (`/hld/generate`, `/db/generate`, `/lld/generate`) **in parallel**,
+- keeps three loading flags (one per phase),
+- shows a loading indicator in each tab header while its phase is generating,
+- and renders each result in its own canvas once ready.
 
 ## Features
 
