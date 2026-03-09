@@ -38,6 +38,7 @@ interface UnifiedDesignPanelProps {
   onGenerate: (prompt: string, designType: string) => void;
   isPipelineRunning: boolean;
   currentStep: DesignPhase | null;
+  loadingPhases?: DesignPhase[];
   error: string | null;
 }
 
@@ -49,6 +50,7 @@ export default function UnifiedDesignPanel({
   onGenerate,
   isPipelineRunning,
   currentStep,
+  loadingPhases = [],
   error,
 }: UnifiedDesignPanelProps) {
   const handleSubmit = (e: React.FormEvent) => {
@@ -136,10 +138,14 @@ export default function UnifiedDesignPanel({
         </Select>
       </div>
 
-      {isPipelineRunning && currentStep && (
+      {isPipelineRunning && (loadingPhases.length > 0 || currentStep) && (
         <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm text-primary">
           <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          {STEP_LABELS[currentStep]}…
+          {loadingPhases.length > 0
+            ? `Generating ${loadingPhases.map((p) => STEP_LABELS[p]).join(", ")}…`
+            : currentStep
+              ? `${STEP_LABELS[currentStep]}…`
+              : "Generating…"}
         </div>
       )}
 
@@ -148,9 +154,7 @@ export default function UnifiedDesignPanel({
         disabled={!prompt.trim() || isPipelineRunning}
         className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg shadow-primary/20"
       >
-        {isPipelineRunning
-          ? (currentStep && STEP_LABELS[currentStep] + "…") || "Generating…"
-          : "Generate full design"}
+        {isPipelineRunning ? "Generating" : "Generate full design"}
       </Button>
 
       {error && (

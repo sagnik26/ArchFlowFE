@@ -19,26 +19,6 @@ import type { DBSchema } from "@/types/dbDesign";
 import type { LLDDesign } from "@/types/lldDesign";
 import { toast } from "sonner";
 
-function hldToContextString(hld: DiagramResponse): string {
-  const parts = [`Title: ${hld.title}`, `Topic: ${hld.topic}`];
-  if (hld.nodes?.length) {
-    parts.push(
-      "Components: " + hld.nodes.map((n) => n.data?.label || n.id).join(", ")
-    );
-  }
-  return parts.join("\n");
-}
-
-function dbToContextString(db: DBSchema): string {
-  const parts = [`Schema: ${db.name}`];
-  if (db.entities?.length) {
-    parts.push(
-      "Entities: " + db.entities.map((e) => e.displayName || e.name).join(", ")
-    );
-  }
-  return parts.join("\n");
-}
-
 export default function DesignStudio() {
   const {
     currentPhase,
@@ -53,12 +33,15 @@ export default function DesignStudio() {
     hldDesignType,
     setHLDPrompt,
     setHLDDesignType,
+    resetAll,
   } = useDesignContext();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const [pipelineError, setPipelineError] = useState<string | null>(null);
-  const [pipelineStep, setPipelineStep] = useState<DesignPhase | null>(null);
+  const [loadingHLD, setLoadingHLD] = useState(false);
+  const [loadingDB, setLoadingDB] = useState(false);
+  const [loadingLLD, setLoadingLLD] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const effectiveHldResult = hldResult;
@@ -70,7 +53,10 @@ export default function DesignStudio() {
         return;
       }
       setPipelineError(null);
-      setPipelineStep("hld");
+      resetAll();
+      setLoadingHLD(true);
+      setLoadingDB(true);
+      setLoadingLLD(true);
       setCurrentPhase("hld");
 
       const handleAuth = (res: Response) => {
@@ -82,68 +68,60 @@ export default function DesignStudio() {
         return false;
       };
 
-      try {
-        // Step 1: HLD
-        const hldRes = await fetchApi("/api/v1/hld/generate", {
+      const runHLD = async () => {
+        const res = await fetchApi("/api/v1/hld/generate", {
           method: "POST",
           body: JSON.stringify({ topic: prompt, type: designType }),
         });
-        if (handleAuth(hldRes)) return;
-        if (!hldRes.ok) {
-          const data = await hldRes.json().catch(() => ({}));
-          throw new Error(data.message || "HLD generation failed");
+        if (handleAuth(res)) return;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setPipelineError((prev) => prev || data.message || "HLD generation failed");
+          return;
         }
-        const hld = (await hldRes.json()) as DiagramResponse;
+        const hld = (await res.json()) as DiagramResponse;
         setHLDResult(hld);
-        setCurrentPhase("hld");
-        setPipelineStep("db");
+      };
 
-        // Step 2: DB (with HLD context)
-        const hldContext = hldToContextString(hld);
-        const dbRes = await fetchApi("/api/v1/db/generate", {
+      const runDB = async () => {
+        const res = await fetchApi("/api/v1/db/generate", {
           method: "POST",
-          body: JSON.stringify({ prompt, hldContext }),
+          body: JSON.stringify({ prompt }),
         });
-        if (handleAuth(dbRes)) return;
-        if (!dbRes.ok) {
-          const data = await dbRes.json().catch(() => ({}));
-          throw new Error(data.message || "DB generation failed");
+        if (handleAuth(res)) return;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setPipelineError((prev) => prev || data.message || "DB generation failed");
+          return;
         }
-        const db = (await dbRes.json()) as DBSchema;
+        const db = (await res.json()) as DBSchema;
         setDBResult(db);
-        setCurrentPhase("db");
-        setPipelineStep("lld");
+      };
 
-        // Step 3: LLD (with DB and HLD context)
-        const dbContext = dbToContextString(db);
-        const lldRes = await fetchApi("/api/v1/lld/generate", {
+      const runLLD = async () => {
+        const res = await fetchApi("/api/v1/lld/generate", {
           method: "POST",
-          body: JSON.stringify({ prompt, dbContext, hldContext }),
+          body: JSON.stringify({ prompt }),
         });
-        if (handleAuth(lldRes)) return;
-        if (!lldRes.ok) {
-          const data = await lldRes.json().catch(() => ({}));
-          throw new Error(data.message || "LLD generation failed");
+        if (handleAuth(res)) return;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setPipelineError((prev) => prev || data.message || "LLD generation failed");
+          return;
         }
-        const lld = (await lldRes.json()) as LLDDesign;
+        const lld = (await res.json()) as LLDDesign;
         setLLDResult(lld);
-        setCurrentPhase("lld");
-      } catch (err) {
-        setPipelineError(
-          err instanceof Error ? err.message : "Pipeline failed",
-        );
+      };
+
+      try {
+        await Promise.all([runHLD(), runDB(), runLLD()]);
       } finally {
-        setPipelineStep(null);
+        setLoadingHLD(false);
+        setLoadingDB(false);
+        setLoadingLLD(false);
       }
     },
-    [
-      user,
-      setCurrentPhase,
-      setHLDResult,
-      setDBResult,
-      setLLDResult,
-      navigate,
-    ],
+    [user, setCurrentPhase, setHLDResult, setDBResult, setLLDResult, resetAll, navigate],
   );
 
   const onSave = useCallback(async () => {
@@ -182,7 +160,7 @@ export default function DesignStudio() {
   const renderPhaseContent = () => {
     switch (currentPhase) {
       case "hld":
-        if (pipelineStep === "hld") return <LoadingState />;
+        if (loadingHLD) return <LoadingState />;
         if (effectiveHldResult) return <HLDCanvas data={effectiveHldResult} />;
         return (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground p-10">
@@ -196,7 +174,7 @@ export default function DesignStudio() {
           </div>
         );
       case "db":
-        if (pipelineStep === "db") return <LoadingState />;
+        if (loadingDB) return <LoadingState />;
         if (dbResult) return <DBDesigner data={dbResult} />;
         return (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground p-10">
@@ -206,11 +184,11 @@ export default function DesignStudio() {
             <p className="text-sm font-medium text-foreground">
               No DB schema yet
             </p>
-            <p className="text-xs mt-1">Complete HLD first.</p>
+            <p className="text-xs mt-1">Generate from the sidebar.</p>
           </div>
         );
       case "lld":
-        if (pipelineStep === "lld") return <LoadingState />;
+        if (loadingLLD) return <LoadingState />;
         if (lldResult) return <LLDDesigner data={lldResult} />;
         return (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground p-10">
@@ -218,7 +196,7 @@ export default function DesignStudio() {
               <Boxes className="w-7 h-7 opacity-70" />
             </div>
             <p className="text-sm font-medium text-foreground">No LLD yet</p>
-            <p className="text-xs mt-1">Complete HLD and DB Design first.</p>
+            <p className="text-xs mt-1">Generate from the sidebar.</p>
           </div>
         );
       default:
@@ -226,10 +204,14 @@ export default function DesignStudio() {
     }
   };
 
-  const isPipelineRunning = pipelineStep !== null;
+  const isPipelineRunning = loadingHLD || loadingDB || loadingLLD;
 
-  const hasGenerationStarted =
-    isPipelineRunning || !!effectiveHldResult || !!dbResult || !!lldResult;
+  const loadingPhases: DesignPhase[] = [];
+  if (loadingHLD) loadingPhases.push("hld");
+  if (loadingDB) loadingPhases.push("db");
+  if (loadingLLD) loadingPhases.push("lld");
+
+  const showTabs = isPipelineRunning || !!effectiveHldResult || !!dbResult || !!lldResult;
 
   const renderPhasePanel = () => (
     <UnifiedDesignPanel
@@ -239,7 +221,8 @@ export default function DesignStudio() {
       onDesignTypeChange={setHLDDesignType}
       onGenerate={onUnifiedGenerate}
       isPipelineRunning={isPipelineRunning}
-      currentStep={pipelineStep}
+      currentStep={loadingPhases.length === 1 ? loadingPhases[0] : null}
+      loadingPhases={loadingPhases}
       error={pipelineError}
     />
   );
@@ -297,36 +280,20 @@ export default function DesignStudio() {
 
         {/* Main content area */}
         <div className="flex-1 min-w-0 flex flex-col min-h-0 gap-2">
-          {hasGenerationStarted && <DesignPhaseNav />}
+          {showTabs && <DesignPhaseNav loadingPhases={loadingPhases} />}
 
-          {!hasGenerationStarted ? (
-            <div className="flex-1 design-studio-card flex flex-col items-center justify-center min-h-[420px] text-center px-10 py-12">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 border border-border/40 mb-6">
-                <Boxes className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h2 className="text-xl font-semibold text-foreground">
-                Start by giving a prompt
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
-                Describe your system in the sidebar and click Generate. We’ll
-                create your High-Level Design, Database schema, and Low-Level
-                Design in one go.
-              </p>
-            </div>
-          ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPhase}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex-1 design-studio-card relative overflow-hidden min-h-[420px]"
-              >
-                {renderPhaseContent()}
-              </motion.div>
-            </AnimatePresence>
-          )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPhase}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 design-studio-card relative overflow-hidden min-h-[420px]"
+            >
+              {renderPhaseContent()}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>
